@@ -23,7 +23,8 @@
                     top: item.top + 'px',
                     left: item.left + 'px',
                     'background-position-x': item.background_x +'px',
-                    'background-position-y': item.background_y +'px'}"
+                    'background-position-y': item.background_y +'px',
+                    'background-size': box_width +'px '+ box_height +'px'}"
             :data-ori_index="item.ori_index"
             :data-cur_index="item.cur_index"
             v-show="!item.is_blank"></div>
@@ -36,14 +37,14 @@ export default {
   name: "home",
   data() {
     return {
-      box_width: 300,
-      box_height: 300,
+      box_width: 400,
+      box_height: 400,
 
       width: 0,
       height: 0,
 
-      row: 3,
-      column: 3,
+      row: 4,
+      column: 4,
 
       position_arr:[],        //每块拼图的坐标
       blank_puzzle_index: 0,    //空白块所在的位置，从0开始计算
@@ -62,7 +63,7 @@ export default {
           background_x: - (c * this.width),
           ori_index: index,   //应所在的位置,不会变化
           cur_index: index,   //当前所在位置,会变化
-          cur_r: r,           //当前所在的行，会变化
+          cur_r: r,           //当前所在的行，会变化 从0开始
           cur_c: c,           //当前所在的列，会变化
         });
         index ++;
@@ -92,11 +93,8 @@ export default {
       let cur_puzzle = this.position_arr[cur_index]
       let blank_puzzle = this.position_arr[this.blank_puzzle_index]
 
-
-      console.log({cur_puzzle},{blank_puzzle});
-
       //判断和空白块是否相邻，且是同行或同列，否则不能对换
-      if (!((Math.abs(cur_index - this.blank_puzzle_index) == 1 || Math.abs(cur_index - this.blank_puzzle_index) == 3)
+      if (!((Math.abs(cur_index - this.blank_puzzle_index) == 1 || Math.abs(cur_index - this.blank_puzzle_index) ==this.column)
         && (cur_puzzle.cur_r == blank_puzzle.cur_r || cur_puzzle.cur_c == blank_puzzle.cur_c))) {
         return;
       }
@@ -113,8 +111,7 @@ export default {
 
 
       this.blank_puzzle_index = cur_index
-      // console.log('position_arr', this.position_arr);
-
+  
       if (this.checkSuccess()) {
         console.log('success!!!');
       }
@@ -145,8 +142,11 @@ export default {
     },
     //计算定位 打乱顺序或点击更换位置时需要
     setPosition(obj, index) {
-      obj.cur_r = Math.floor(index / this.row);
-      obj.cur_c = index % this.column;
+      //根据index推算所在的行和列 index是从0开始的
+      let temp = index % this.column;
+      obj.cur_r = temp == 0 ? index/this.column : Math.floor(index / this.column);
+      obj.cur_c = temp;
+      // console.log('index:', index , 'cur_r:', obj.cur_r,'cur_c:', obj.cur_c);
       obj.top = obj.cur_r * this.height
       obj.left = obj.cur_c * this.width
       obj.cur_index = index
